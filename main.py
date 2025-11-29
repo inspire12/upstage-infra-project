@@ -4,12 +4,12 @@ from pymysql import cursors
 from connection_pool import PymysqlConnectionPool
 
 pool = PymysqlConnectionPool(
-  maxsize=5,
-  host="localhost",
-  port=3306,
-  user="root",
-  password="password",
-  database="llmagent",
+    maxsize=5,
+    host="localhost",
+    port=3306,
+    user="root",
+    password="password",
+    database="llmagent",
 )
 
 
@@ -68,14 +68,28 @@ def update_user_name(user_id: int, new_name: str):
         pool.release_connection(conn)
 
 
+def delete_user_by_email(email: str):
+    conn = pool.get_conn()
+    try:
+        with conn.cursor() as cursor:
+            sql = "DELETE FROM users WHERE email = %s"
+            cursor.execute(sql, (email,))
+        conn.commit()
+    finally:
+        pool.release_connection(conn)
+
+
 if __name__ == '__main__':
     # connection()
     # create_user('hak', 'ox4443@naver.com')
     # print(get_user_by_email('ox4443@naver.com'))
     # for i in range(100):
     #     print(get_user_by_email('ox4443@naver.com'))
-    user = get_user_by_email('ox4443@naver.com')
-    print(user)
-    update_user_name(user.get('id'), 'yeong')
-    replace_user = get_user_by_email('ox4443@naver.com')
-    print(replace_user)
+    # user = get_user_by_email('ox4443@naver.com')
+    # print(user)
+    # update_user_name(user.get('id'), 'yeong')
+    # replace_user = get_user_by_email('ox4443@naver.com')
+    # print(replace_user)
+    delete_user_by_email('ox4443@naver.com')
+    print(get_user_by_email('ox4443@naver.com'))
+
