@@ -139,6 +139,33 @@ def save_chat_transaction(user_id: int, user_msg: str, assistant_msg: str):
         pool.release_connection(conn)
 
 
+def save_chat_transaction_fail(user_id: int, user_msg: str, assistant_msg: str):
+    conn = pool.get_conn()
+    try:
+        with conn.cursor() as cursor:
+            # 1) 사용자 메시지 저장
+            sql1 = """
+                   INSERT INTO conversations (user_id, role, message)
+                   VALUES (%s, 'user', %s) \
+                   """
+            cursor.execute(sql1, (user_id, user_msg))
+
+            # 2) 어시스턴트 메시지 저장
+            sql2 = """
+                   INSERT INTO conversations (user_id, '아차실수', message)
+                   VALUES (%s, 'assistant', %s) \
+                   """
+            cursor.execute(sql2, (user_id, assistant_msg))
+
+        conn.commit()  # 두 개가 모두 성공한 경우에만 commit
+
+    except Exception as e:
+        conn.rollback()  # 하나라도 실패하면 전체 취소
+        raise e
+    finally:
+        pool.release_connection(conn)
+
+
 class Role(enum.Enum):
     user = 'user'
     assistant = 'assistant'
@@ -164,4 +191,8 @@ if __name__ == '__main__':
     save_chat_transaction(1, '뭐해?', '그냥있어요')
     print(get_recent_conversations(1, 2))
 
+    try:
+        save_chat_transaction_fail(1, '뭐라고?', '그냥있다고요')
+    except:
+        pass
     print(get_recent_conversations(1, 2))
