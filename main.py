@@ -53,9 +53,29 @@ def get_user_by_email(email: str):
         pool.release_connection(conn)
 
 
+def update_user_name(user_id: int, new_name: str):
+    conn = pool.get_conn()
+    try:
+        with conn.cursor() as cursor:
+            sql = """
+                  UPDATE users
+                  SET name = %s
+                  WHERE id = %s
+                  """
+            cursor.execute(sql, (new_name, user_id))
+        conn.commit()
+    finally:
+        pool.release_connection(conn)
+
+
 if __name__ == '__main__':
     # connection()
     # create_user('hak', 'ox4443@naver.com')
-    for i in range(100):
-        print(get_user_by_email('ox4443@naver.com'))
-
+    # print(get_user_by_email('ox4443@naver.com'))
+    # for i in range(100):
+    #     print(get_user_by_email('ox4443@naver.com'))
+    user = get_user_by_email('ox4443@naver.com')
+    print(user)
+    update_user_name(user.get('id'), 'yeong')
+    replace_user = get_user_by_email('ox4443@naver.com')
+    print(replace_user)
