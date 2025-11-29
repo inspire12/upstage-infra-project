@@ -1,3 +1,5 @@
+import enum
+
 import pymysql
 from pymysql import cursors
 
@@ -79,6 +81,40 @@ def delete_user_by_email(email: str):
         pool.release_connection(conn)
 
 
+def add_conversation(user_id: int, role: str, message: str):
+    conn = pool.get_conn()
+    try:
+        with conn.cursor() as cursor:
+            sql = """
+                  INSERT INTO conversations (user_id, role, message)
+                  VALUES (%s, %s, %s) 
+                  """
+            cursor.execute(sql, (user_id, role, message))
+        conn.commit()
+    finally:
+        pool.release_connection(conn)
+
+
+def get_recent_conversations(user_id: int, limit: int = 20):
+    conn = pool.get_conn()
+    try:
+        with conn.cursor() as cursor:
+            sql = """
+                  SELECT id, user_id, role, message, created_at
+                  FROM conversations
+                  WHERE user_id = %s
+                  ORDER BY created_at DESC
+                      LIMIT %s 
+                  """
+            cursor.execute(sql, (user_id, limit))
+            return cursor.fetchall()
+    finally:
+        pool.release_connection(conn)
+
+class Role(enum.Enum):
+    user = 'user'
+    assistant = 'assistant'
+
 if __name__ == '__main__':
     # connection()
     # create_user('hak', 'ox4443@naver.com')
@@ -90,6 +126,8 @@ if __name__ == '__main__':
     # update_user_name(user.get('id'), 'yeong')
     # replace_user = get_user_by_email('ox4443@naver.com')
     # print(replace_user)
-    delete_user_by_email('ox4443@naver.com')
-    print(get_user_by_email('ox4443@naver.com'))
+    # delete_user_by_email('ox4443@naver.com')
+    # print(get_user_by_email('ox4443@naver.com'))
 
+    add_conversation(1, Role.user.name, '뭐해?')
+    print(get_recent_conversations(1, 1))
