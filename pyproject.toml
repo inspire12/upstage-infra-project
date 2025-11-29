@@ -3,4 +3,6 @@ name = "upstage-infra-project"
 version = "0.1.0"
 description = "Add your description here"
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+    "pymysql>=1.1.2",
+]
