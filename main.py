@@ -87,7 +87,7 @@ def add_conversation(user_id: int, role: str, message: str):
         with conn.cursor() as cursor:
             sql = """
                   INSERT INTO conversations (user_id, role, message)
-                  VALUES (%s, %s, %s) \
+                  VALUES (%s, %s, %s) 
                   """
             cursor.execute(sql, (user_id, role, message))
         conn.commit()
@@ -104,7 +104,7 @@ def get_recent_conversations(user_id: int, limit: int = 20):
                   FROM conversations
                   WHERE user_id = %s
                   ORDER BY created_at DESC
-                      LIMIT %s \
+                      LIMIT %s 
                   """
             cursor.execute(sql, (user_id, limit))
             return cursor.fetchall()
@@ -119,14 +119,14 @@ def save_chat_transaction(user_id: int, user_msg: str, assistant_msg: str):
             # 1) 사용자 메시지 저장
             sql1 = """
                    INSERT INTO conversations (user_id, role, message)
-                   VALUES (%s, 'user', %s) \
+                   VALUES (%s, 'user', %s) 
                    """
             cursor.execute(sql1, (user_id, user_msg))
 
             # 2) 어시스턴트 메시지 저장
             sql2 = """
                    INSERT INTO conversations (user_id, role, message)
-                   VALUES (%s, 'assistant', %s) \
+                   VALUES (%s, 'assistant', %s) 
                    """
             cursor.execute(sql2, (user_id, assistant_msg))
 
@@ -146,14 +146,14 @@ def save_chat_transaction_fail(user_id: int, user_msg: str, assistant_msg: str):
             # 1) 사용자 메시지 저장
             sql1 = """
                    INSERT INTO conversations (user_id, role, message)
-                   VALUES (%s, 'user', %s) \
+                   VALUES (%s, 'user', %s) 
                    """
             cursor.execute(sql1, (user_id, user_msg))
 
             # 2) 어시스턴트 메시지 저장
             sql2 = """
                    INSERT INTO conversations (user_id, '아차실수', message)
-                   VALUES (%s, 'assistant', %s) \
+                   VALUES (%s, 'assistant', %s) 
                    """
             cursor.execute(sql2, (user_id, assistant_msg))
 
