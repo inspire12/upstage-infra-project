@@ -16,20 +16,20 @@ from app.models.role import Role
 
 def run_user_crud_demo():
   # 1. 유저 생성
-  create_user("hak", "ox4443@naver.com")
+  # create_user("hak", "ox4443@naver.com")
 
   # 2. 조회
   user = get_user_by_email("ox4443@naver.com")
   print("created user:", user)
-
-  # 3. 이름 변경
-  update_user_name(user["id"], "yeong")
-  replaced = get_user_by_email("ox4443@naver.com")
-  print("updated user:", replaced)
-
-  # 4. 삭제
-  delete_user_by_email("ox4443@naver.com")
-  print("after delete:", get_user_by_email("ox4443@naver.com"))
+  #
+  # # 3. 이름 변경
+  # update_user_name(user["id"], "yeong")
+  # replaced = get_user_by_email("ox4443@naver.com")
+  # print("updated user:", replaced)
+  #
+  # # 4. 삭제
+  # delete_user_by_email("ox4443@naver.com")
+  # print("after delete:", get_user_by_email("ox4443@naver.com"))
 
 
 def run_chat_demo():

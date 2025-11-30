@@ -1,16 +1,21 @@
 from app.core.db import release_conn, get_conn
+from app.models.conversation import Conversation
+from app.models.role import Role
 
 
 def add_conversation(user_id: int, role: str, message: str):
     conn = get_conn()
     try:
-        with conn.cursor() as cursor:
-            sql = """
-                  INSERT INTO conversations (user_id, role, message)
-                  VALUES (%s, %s, %s) 
-                  """
-            cursor.execute(sql, (user_id, role, message))
+        role_enum = Role(role)  # 'user' -> Role.user
+        conv = Conversation(
+            user_id=user_id,
+            role=role_enum,
+            message=message,
+        )
+        conn.add(conv)
         conn.commit()
+        conn.refresh(conv)
+        return conv
     finally:
         release_conn(conn)
 
@@ -18,16 +23,13 @@ def add_conversation(user_id: int, role: str, message: str):
 def get_recent_conversations(user_id: int, limit: int = 20):
     conn = get_conn()
     try:
-        with conn.cursor() as cursor:
-            sql = """
-                  SELECT id, user_id, role, message, created_at
-                  FROM conversations
-                  WHERE user_id = %s
-                  ORDER BY created_at DESC
-                      LIMIT %s 
-                  """
-            cursor.execute(sql, (user_id, limit))
-            return cursor.fetchall()
+        return (
+            conn.query(Conversation)
+            .filter(Conversation.user_id == user_id)
+            .order_by(Conversation.created_at.desc())
+            .limit(limit)
+            .all()
+        )
     finally:
         release_conn(conn)
 
@@ -35,25 +37,23 @@ def get_recent_conversations(user_id: int, limit: int = 20):
 def save_chat_transaction(user_id: int, user_msg: str, assistant_msg: str):
     conn = get_conn()
     try:
-        with conn.cursor() as cursor:
-            # 1) 사용자 메시지 저장
-            sql1 = """
-                   INSERT INTO conversations (user_id, role, message)
-                   VALUES (%s, 'user', %s) 
-                   """
-            cursor.execute(sql1, (user_id, user_msg))
+        user_conversation = Conversation(
+            user_id=user_id,
+            role=Role.user,
+            message=user_msg,
+        )
+        assistant_conversation = Conversation(
+            user_id=user_id,
+            role=Role.assistant,
+            message=assistant_msg,
+        )
 
-            # 2) 어시스턴트 메시지 저장
-            sql2 = """
-                   INSERT INTO conversations (user_id, role, message)
-                   VALUES (%s, 'assistant', %s) 
-                   """
-            cursor.execute(sql2, (user_id, assistant_msg))
+        conn.add(user_conversation)
+        conn.add(assistant_conversation)
 
-        conn.commit()  # 두 개가 모두 성공한 경우에만 commit
-
+        conn.commit()
     except Exception as e:
-        conn.rollback()  # 하나라도 실패하면 전체 취소
+        conn.rollback()
         raise e
     finally:
         release_conn(conn)
@@ -62,26 +62,24 @@ def save_chat_transaction(user_id: int, user_msg: str, assistant_msg: str):
 def save_chat_transaction_fail(user_id: int, user_msg: str, assistant_msg: str):
     conn = get_conn()
     try:
-        with conn.cursor() as cursor:
-            # 1) 사용자 메시지 저장
-            sql1 = """
-                   INSERT INTO conversations (user_id, role, message)
-                   VALUES (%s, 'user', %s) 
-                   """
-            cursor.execute(sql1, (user_id, user_msg))
+        user_conversation = Conversation(
+            user_id=user_id,
+            role=Role.user,
+            message=user_msg,
+        )
+        conn.add(user_conversation)
 
-            # 2) 어시스턴트 메시지 저장
-            sql2 = """
-                   INSERT INTO conversations (user_id, '아차실수', message)
-                   VALUES (%s, 'assistant', %s) 
-                   """
-            cursor.execute(sql2, (user_id, assistant_msg))
+        # 일부러 잘못된 값으로 ENUM 오류 발생 유도
+        broken_conversation = Conversation(
+            user_id=user_id,
+            role="wrong",  # Role enum에 없는 값
+            message=assistant_msg,
+        )
+        conn.add(broken_conversation)
 
-        conn.commit()  # 두 개가 모두 성공한 경우에만 commit
-
+        conn.commit()
     except Exception as e:
-        conn.rollback()  # 하나라도 실패하면 전체 취소
+        conn.rollback()
         raise e
     finally:
         release_conn(conn)
-
