@@ -42,9 +42,6 @@ def get_conn():
   """
   기존에는 connection_pool.PymysqlConnectionPool 에서 커넥션을 가져왔지만,
   이제는 SQLAlchemy Session을 반환함.
-  함수 이름을 그대로 두는 이유:
-  - 기존 서비스/레포지토리 코드와의 호환성을 유지하기 위해
-  - DB 구현체(pymysql → sqlalchemy)를 숨기기 위해
   """
   return SessionLocal()
 
