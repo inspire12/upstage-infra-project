@@ -1,8 +1,8 @@
-from app.core.db import pool
+from app.core.db import release_conn, get_conn
 
 
 def add_conversation(user_id: int, role: str, message: str):
-    conn = pool.get_conn()
+    conn = get_conn()
     try:
         with conn.cursor() as cursor:
             sql = """
@@ -12,11 +12,11 @@ def add_conversation(user_id: int, role: str, message: str):
             cursor.execute(sql, (user_id, role, message))
         conn.commit()
     finally:
-        pool.release_connection(conn)
+        release_conn(conn)
 
 
 def get_recent_conversations(user_id: int, limit: int = 20):
-    conn = pool.get_conn()
+    conn = get_conn()
     try:
         with conn.cursor() as cursor:
             sql = """
@@ -29,11 +29,11 @@ def get_recent_conversations(user_id: int, limit: int = 20):
             cursor.execute(sql, (user_id, limit))
             return cursor.fetchall()
     finally:
-        pool.release_connection(conn)
+        release_conn(conn)
 
 
 def save_chat_transaction(user_id: int, user_msg: str, assistant_msg: str):
-    conn = pool.get_conn()
+    conn = get_conn()
     try:
         with conn.cursor() as cursor:
             # 1) 사용자 메시지 저장
@@ -56,11 +56,11 @@ def save_chat_transaction(user_id: int, user_msg: str, assistant_msg: str):
         conn.rollback()  # 하나라도 실패하면 전체 취소
         raise e
     finally:
-        pool.release_connection(conn)
+        release_conn(conn)
 
 
 def save_chat_transaction_fail(user_id: int, user_msg: str, assistant_msg: str):
-    conn = pool.get_conn()
+    conn = get_conn()
     try:
         with conn.cursor() as cursor:
             # 1) 사용자 메시지 저장
@@ -83,5 +83,5 @@ def save_chat_transaction_fail(user_id: int, user_msg: str, assistant_msg: str):
         conn.rollback()  # 하나라도 실패하면 전체 취소
         raise e
     finally:
-        pool.release_connection(conn)
+        release_conn(conn)
 

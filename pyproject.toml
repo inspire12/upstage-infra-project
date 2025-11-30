@@ -5,4 +5,5 @@ description = "Add your description here"
 requires-python = ">=3.12"
 dependencies = [
     "pymysql>=1.1.2",
+    "sqlalchemy>=2.0.44",
 ]
