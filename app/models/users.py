@@ -1,9 +1,11 @@
 # app/models/user.py
 from sqlalchemy import Column, Integer, String, DateTime, func
+from sqlalchemy_serializer import SerializerMixin
+
 from app.models.base import Base
 
 
-class User(Base):
+class User(Base, SerializerMixin):
   __tablename__ = "users"
 
   id = Column(Integer, primary_key=True, autoincrement=True)

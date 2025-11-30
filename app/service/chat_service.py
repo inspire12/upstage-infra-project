@@ -19,7 +19,7 @@ def add_assistant_message(user_id: int, message: str):
 
 
 def get_recent_conversations(user_id: int, limit: int = 20):
-  return repo_get_recent_conversations(user_id, limit)
+  return repo_get_recent_conversations(user_id, limit).to_dict()
 
 
 def save_chat_transaction(user_id: int, user_msg: str, assistant_msg: str):

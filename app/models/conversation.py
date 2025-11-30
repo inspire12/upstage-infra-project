@@ -1,10 +1,12 @@
 # app/models/conversation.py
 from sqlalchemy import Column, Integer, String, DateTime, Enum, func
+from sqlalchemy_serializer import SerializerMixin
+
 from app.models.base import Base
 from app.models.role import Role  # 기존 enum 그대로 사용
 
 
-class Conversation(Base):
+class Conversation(Base, SerializerMixin):
   __tablename__ = "conversations"
 
   id = Column(Integer, primary_key=True, autoincrement=True)
