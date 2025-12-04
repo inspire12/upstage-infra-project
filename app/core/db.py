@@ -1,11 +1,16 @@
+import os
+
 from app.core.connection_pool import PymysqlConnectionPool
+from dotenv import load_dotenv
+
+load_dotenv()
 
 pool = PymysqlConnectionPool(
     maxsize=5,
     host="localhost",
     port=3306,
-    user="root",
-    password="password",
+    user=os.getenv('db_user'),
+    password=os.getenv('db_password'),
     database="llmagent",
 )
 
