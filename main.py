@@ -3,7 +3,7 @@ import enum
 import pymysql
 from pymysql import cursors
 
-from connection_pool import PymysqlConnectionPool
+from app.core.db import PymysqlConnectionPool
 
 pool = PymysqlConnectionPool(
     maxsize=5,
