@@ -8,7 +8,7 @@ def create_user(name: str, email: str):
 
 
 def get_user_by_email(email: str):
-  return user_repository.get_user_by_email(email)
+  return user_repository.get_user_by_email(email).to_dict()
 
 
 def update_user_name(user_id: int, new_name: str):
